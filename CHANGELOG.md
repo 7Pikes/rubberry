@@ -1,5 +1,7 @@
 ## master
 
+* Implement `update_attribute` and `update_attributes` methods
+
 * Implement base functionality, such as:
 
   - CRUD

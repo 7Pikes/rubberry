@@ -126,6 +126,16 @@ module Rubberry
       end
     end
 
+    def update_attribute(attribute, value)
+      self[attribute] = value
+      save
+    end
+
+    def update_attributes(attributes)
+      assign_attributes(attributes)
+      save
+    end
+
     def reload
       init_with(connection.get(index: self.class.index_name, type: self.class.type_name, id: _id, refresh: true))
     rescue Elasticsearch::Transport::Transport::Errors::NotFound => e

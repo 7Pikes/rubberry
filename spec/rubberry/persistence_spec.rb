@@ -424,6 +424,33 @@ describe Rubberry::Context do
     end
   end
 
+  describe '#update_attribute' do
+    let(:user){ User.create(name: 'Undr') }
+
+    specify{ expect{ user.update_attribute(:name, 'Arny') }.to change{ user.name }.from('Undr').to('Arny') }
+    specify{ expect{ user.update_attribute(:name, 'Arny') }.to change{ user.reload.name }.from('Undr').to('Arny') }
+  end
+
+  describe '#update_attributes' do
+    let(:user){ User.create(name: 'Undr') }
+
+    specify{ expect{
+      user.update_attributes(name: 'Arny', counter: 10)
+    }.to change{ user.name }.from('Undr').to('Arny') }
+
+    specify{ expect{
+      user.update_attributes(name: 'Arny', counter: 10)
+    }.to change{ user.counter }.from(0).to(10) }
+
+    specify{ expect{
+      user.update_attributes(name: 'Arny', counter: 10)
+    }.to change{ user.reload.name }.from('Undr').to('Arny') }
+
+    specify{ expect{
+      user.update_attributes(name: 'Arny', counter: 10)
+    }.to change{ user.reload.counter }.from(0).to(10) }
+  end
+
   describe '#reload' do
     let(:user){ User.create(name: 'Undr') }
 
