@@ -1,0 +1,6 @@
+development:
+  client:
+    hosts: ['http://localhost:9200']
+    log: true
+    trace: true
+    dynamic_scripting: true

@@ -1,0 +1,5 @@
+en:
+  rubberry:
+    errors:
+      messages:
+        document_invalid: "Validation failed: %{errors}"
