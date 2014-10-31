@@ -33,15 +33,17 @@ module Rubberry
     end
 
     def assign_options!(options = {})
-      (options || {}).each do |key, value|
-        if key == :client && value.is_a?(String)
-          @client_config = { url: value }
-        elsif key == :client && value.is_a?(Hash)
-          @client_config = value
-        else
-          send("#{key}=", value)
-        end
+      options = (options || {}).with_indifferent_access
+
+      if value = options[:client]
+        @client_config = OpenStruct.new(value.is_a?(String) ? { url: value } : OpenStruct.new(value))
       end
+
+      if value = options[:index]
+        @index = OpenStruct.new(value.presence || {})
+      end
+
+      options.slice(*OPTIONS).each{|key, value| send("#{key}=", value) }
     end
 
     def yaml_options(file)
