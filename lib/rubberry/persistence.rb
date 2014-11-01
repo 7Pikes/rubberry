@@ -97,7 +97,7 @@ module Rubberry
     end
 
     def increment(counters, options = {})
-      if options.delete(:atomic) && config.dynamic_scripting
+      if options.delete(:atomic) && config.dynamic_scripting?
         self.class.increment(_id, counters)
         reload
       else
@@ -112,7 +112,7 @@ module Rubberry
     end
 
     def decrement(counters, options = {})
-      if options.delete(:atomic) && config.dynamic_scripting
+      if options.delete(:atomic) && config.dynamic_scripting?
         self.class.decrement(_id, counters)
         reload
       else
@@ -153,7 +153,7 @@ module Rubberry
     def create_document
       creation do |attrs|
         connection.create(index: self.class.index_name, type: self.class.type_name, body: attrs).tap do |result|
-          self.class.index.refresh if config.refresh
+          self.class.index.refresh if config.refresh?
           @id = result['_id']
           @version = result['_version']
         end

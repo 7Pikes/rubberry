@@ -43,7 +43,7 @@ module Rubberry
 
     def connection
       current_connection ||= synchronize do
-        self.current_connection ||= Elasticsearch::Client.new(config.client_config)
+        self.current_connection ||= Elasticsearch::Client.new(config.client)
       end
     end
 

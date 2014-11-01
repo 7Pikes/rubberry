@@ -1,0 +1,8 @@
+test:
+  client:
+    hosts: ['http://localhost:9200']
+  index:
+    number_of_shards: 3
+    number_of_replicas: 3
+  dynamic_scripting: invalid_value
+  wait_for_status: green

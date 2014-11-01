@@ -19,6 +19,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_dependency 'chewy_query'
+  spec.add_dependency 'optionable'
   spec.add_dependency 'elasticsearch'
   spec.add_dependency 'activemodel'
 

@@ -1,6 +1,7 @@
 require 'yaml'
 require 'chewy_query'
 require 'active_model'
+require 'optionable'
 require 'elasticsearch'
 require 'pp'
 
@@ -34,7 +35,7 @@ module Rubberry
   end
 
   def wait_for_status(timeout = nil)
-    if config.wait_for_status
+    if config.wait_for_status?
       request = { wait_for_status: config.wait_for_status }
       timeout = timeout || config.wait_for_status_timeout
       request[:timeout] = timeout if timeout

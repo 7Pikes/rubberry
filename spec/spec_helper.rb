@@ -11,8 +11,8 @@ Rubberry.configure do |c|
   c.wait_for_status_timeout = '5s'
   c.refresh = true
 
-  c.client_config.hosts = ['localhost:9250']
-  c.client_config.log = false
+  c.client.hosts = ['localhost:9250']
+  c.client.log = false
 
   c.index.number_of_shards = 1
   c.index.number_of_replicas = 0

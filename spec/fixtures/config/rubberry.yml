@@ -1,0 +1,16 @@
+development:
+  client:
+    hosts: ['http://localhost:9200']
+  index:
+    number_of_shards: 3
+    number_of_replicas: 3
+  dynamic_scripting: true
+  wait_for_status: green
+test:
+  client:
+    hosts: ['http://localhost:9200']
+  index:
+    number_of_shards: 3
+    number_of_replicas: 3
+  refresh: true
+  wait_for_status: yellow
