@@ -16,7 +16,11 @@ module Rubberry
 
     class << self
       def index_name(value = nil)
-        value ? (@index_name = value) : (@index_name ||= model_name.collection).gsub('/', '.')
+        if value
+          @index_name = build_index_name(value)
+        else
+          @index_name ||= build_index_name(model_name.collection.gsub('/', '_'))
+        end
       end
 
       def type_name(value = nil)
@@ -37,6 +41,12 @@ module Rubberry
 
       def index
         @index ||= Index.new(self)
+      end
+
+      private
+
+      def build_index_name(name)
+        [config.index_namespace, name].compact.join(?_)
       end
     end
 

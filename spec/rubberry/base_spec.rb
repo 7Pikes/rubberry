@@ -4,11 +4,11 @@ describe Rubberry::Base do
   subject{ stub_model('User::CustomEvent') }
 
   describe '.index_name' do
-    specify{ expect(subject.index_name).to eq('user.custom_events') }
+    specify{ expect(subject.index_name).to eq('test_user_custom_events') }
 
     context do
       before{ subject.index_name('events') }
-      specify{ expect(subject.index_name).to eq('events') }
+      specify{ expect(subject.index_name).to eq('test_events') }
     end
   end
 
@@ -34,7 +34,9 @@ describe Rubberry::Base do
     subject{ stub_model('Event') }
     specify{ expect(subject.context).to be_instance_of(Rubberry::Context) }
     specify{ expect(subject.context.equal?(subject.context)).to be_falsy }
-    specify{ expect(subject.context.send(:request)).to eq(body: { version: true }, index: 'events', type: ['event']) }
+    specify{ expect(subject.context.send(:request)).to eq(
+      body: { version: true }, index: 'test_events', type: ['event']
+    ) }
   end
 
   describe '.connection' do
