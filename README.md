@@ -91,7 +91,7 @@ end
 
 Furthermore, you are able to load more then one config file. They will be merged:
 
-```
+```ruby
 Rubberry.config.load!(Rails.root.join('config/rubberry.local.yml'))
 ```
 
