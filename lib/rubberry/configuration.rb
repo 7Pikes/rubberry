@@ -42,7 +42,7 @@ module Rubberry
     option(:almost_expire_threshold).allow(Optionable.any(Integer))
 
     optionable_validators.keys.each do |option_name|
-      class_eval <<-SOURCE
+      class_eval <<-SOURCE.strip_heredoc
         def #{option_name}
           options[#{option_name.inspect}]
         end

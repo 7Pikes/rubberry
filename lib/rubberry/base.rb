@@ -31,6 +31,10 @@ module Rubberry
         value ? (@document_ttl = value) : @document_ttl
       end
 
+      def document_ttl?
+        !!@document_ttl
+      end
+
       def i18n_scope
         :rubberry
       end

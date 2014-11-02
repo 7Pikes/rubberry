@@ -45,37 +45,5 @@ module Rubberry
     def new_record?
       @new_record
     end
-
-    protected
-
-    def updating
-      return false unless updatable?
-
-      yield elasticated_attributes.slice(*changed)
-
-      @previously_changed = changes
-      @changed_attributes.clear
-      true
-    end
-
-    def creation
-      return false unless creatable?
-      attrs = elasticated_attributes
-      attrs['_ttl'] = self.class.document_ttl if self.class.document_ttl
-
-      yield attrs
-
-      @previously_changed = changes
-      @changed_attributes.clear
-      @new_record = false
-      true
-    end
-
-    def deletion
-      return false unless destroyable?
-      yield
-      @destroyed = true
-      true
-    end
   end
 end

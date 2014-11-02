@@ -2,62 +2,35 @@ module Rubberry
   module Persistence
     extend ActiveSupport::Concern
 
+    METADATA = %w{_id _version}.freeze
+
     module ClassMethods
-      def increment(id, counters)
-        update_counters(id, counters, '+')
+      def increment(id, counters, options = {})
+        options[:id] = id
+        options[:counters] = counters
+        Operations::AtomicIncrement.new(self, options).perform
       end
 
-      def decrement(id, counters)
-        update_counters(id, counters, '-')
+      def decrement(id, counters, options = {})
+        options[:id] = id
+        options[:operation] = '-'
+        options[:counters] = counters
+        Operations::AtomicIncrement.new(self, options).perform
       end
 
-      def create(attributes)
+      def create(attributes, options = {})
         object = new(attributes)
-        object.save
+        object.save(options)
         object
       end
 
       def instantiate(doc)
         allocate.init_with(doc)
       end
-
-      private
-
-      def update_counters(id, counters, operation)
-        result = []
-        counters = [counters] unless counters.respond_to?(:each)
-        counters.each do |counter, value|
-          value = prepare_counter_value(value ||= 1, operation)
-          result << "if(isdef ctx._source.#{counter}){ ctx._source.#{counter} += #{value} } " \
-                    "else { ctx._source.#{counter} = #{value} }"
-        end
-
-        connection.update(
-          index: index_name, type: type_name, id: id, body: { script: result.join('; ') }, refresh: config.refresh
-        )
-        true
-      rescue Elasticsearch::Transport::Transport::Errors::NotFound => e
-        raise DocumentNotFound.new("Couldn't find #{name} with an ID (#{id})")
-      rescue Elasticsearch::Transport::Transport::Errors::BadRequest => e
-        raise e if e.message !~ /dynamic scripting disabled/
-        raise DynamicScriptingDisabled.new
-      end
-
-      def prepare_counter_value(value, operation)
-        case
-        when operation == '-' && !value.to_s.start_with?('-')
-          "-#{value}"
-        when operation == '-'
-          value.to_s.gsub('-', '')
-        else
-          value
-        end
-      end
     end
 
     def init_with(doc)
-      @id = doc['_id']
-      @version = doc['_version']
+      update_metadata!(doc)
       @attributes = initialize_attributes
       assign_attributes(doc['_source'])
       (@changed_attributes || {}).clear
@@ -66,64 +39,37 @@ module Rubberry
       self
     end
 
-    def _id
-      @id
+    METADATA.each do |name|
+      class_eval <<-SOURCE.strip_heredoc
+        def #{name}
+          @#{name}
+        end
+      SOURCE
     end
 
-    def _version
-      @version
-    end
-
-    def save(*)
-      create_or_update
+    def save(options = {})
+      create_or_update(options)
     rescue DocumentInvalid, ReadOnlyDocument => e
       false
     end
 
-    def save!(*)
-      create_or_update
+    def save!(options = {})
+      create_or_update(options)
     end
 
-    def delete
-      deletion do
-        begin
-          result = connection.delete(
-            index: self.class.index_name, type: self.class.type_name, id: _id, refresh: config.refresh
-          )
-          @version = result['_version']
-        rescue Elasticsearch::Transport::Transport::Errors::NotFound => e
-        end
-      end
+    def delete(options = {})
+      Operations::Delete.new(self, options).perform
     end
 
     def increment(counters, options = {})
-      if options.delete(:atomic) && config.dynamic_scripting?
-        self.class.increment(_id, counters)
-        reload
-      else
-        counters = [counters] unless counters.respond_to?(:each)
-        counters.each do |counter, value|
-          value ||= 1
-          self[counter] ||= 0
-          self[counter] += value
-        end
-        save
-      end
+      options[:counters] = counters
+      Operations::Increment.new(self, options).perform
     end
 
     def decrement(counters, options = {})
-      if options.delete(:atomic) && config.dynamic_scripting?
-        self.class.decrement(_id, counters)
-        reload
-      else
-        counters = [counters] unless counters.respond_to?(:each)
-        counters.each do |counter, value|
-          value ||= 1
-          self[counter] ||= 0
-          self[counter] -= value
-        end
-        save
-      end
+      options[:operation] = '-'
+      options[:counters] = counters
+      Operations::Increment.new(self, options).perform
     end
 
     def update_attribute(attribute, value)
@@ -142,40 +88,26 @@ module Rubberry
       raise DocumentNotFound.new("Couldn't find #{name} with an ID (#{_id})")
     end
 
+    def update_metadata!(metadata)
+      metadata.stringify_keys!
+      metadata.slice(*METADATA).each do |ivar, value|
+        instance_variable_set(:"@#{ivar}", value)
+      end
+    end
+
     private
 
-    def create_or_update
+    def create_or_update(options = {})
       raise ReadOnlyDocument if readonly?
-      result = new_record? ? create_document : update_document
-      result != false
+      new_record? ? create_document(options) : update_document(options)
     end
 
-    def create_document
-      creation do |attrs|
-        connection.create(index: self.class.index_name, type: self.class.type_name, body: attrs).tap do |result|
-          self.class.index.refresh if config.refresh?
-          @id = result['_id']
-          @version = result['_version']
-        end
-      end
+    def create_document(options = {})
+      Operations::Create.new(self, options).perform
     end
 
-    def update_document
-      updating do |attrs|
-        begin
-          result = connection.update(
-            id: _id,
-            index: self.class.index_name,
-            type: self.class.type_name,
-            body: { doc: attrs },
-            refresh: config.refresh
-          )
-
-          @version = result['_version']
-        rescue Elasticsearch::Transport::Transport::Errors::NotFound => e
-          raise DocumentNotFound.new("Couldn't find #{name} with an ID (#{id})")
-        end
-      end
+    def update_document(options = {})
+      Operations::Update.new(self, options).perform
     end
   end
 end

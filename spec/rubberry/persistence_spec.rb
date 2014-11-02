@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Rubberry::Context do
+describe Rubberry::Persistence do
   before do
     stub_model('User') do
       mappings do
@@ -359,7 +359,7 @@ describe Rubberry::Context do
       after{ User.config.dynamic_scripting = false }
 
       context do
-        before{ expect(User).to receive(:increment).with(user._id, :counter).and_call_original }
+        before{ expect(User).to receive(:increment).with(user._id, :counter, refresh: true).and_call_original }
         specify{ expect{ user.increment(:counter, atomic: true) }.to change{ user.counter }.from(0).to(1) }
         specify{ expect{ user.increment(:counter, atomic: true) }.to change{
           User.find(user._id).counter
@@ -367,7 +367,7 @@ describe Rubberry::Context do
       end
 
       context do
-        before{ expect(User).to receive(:increment).with(user._id, counter: 10).and_call_original }
+        before{ expect(User).to receive(:increment).with(user._id, { counter: 10 }, refresh: true).and_call_original }
         specify{ expect{ user.increment({ counter: 10 }, atomic: true) }.to change{ user.counter }.from(0).to(10) }
         specify{ expect{ user.increment({ counter: 10 }, atomic: true) }.to change{
           User.find(user._id).counter
@@ -407,7 +407,7 @@ describe Rubberry::Context do
       after{ User.config.dynamic_scripting = false }
 
       context do
-        before{ expect(User).to receive(:decrement).with(user._id, :counter).and_call_original }
+        before{ expect(User).to receive(:decrement).with(user._id, :counter, refresh: true).and_call_original }
         specify{ expect{ user.decrement(:counter, atomic: true) }.to change{ user.counter }.from(0).to(-1) }
         specify{ expect{ user.decrement(:counter, atomic: true) }.to change{
           User.find(user._id).counter
@@ -415,7 +415,7 @@ describe Rubberry::Context do
       end
 
       context do
-        before{ expect(User).to receive(:decrement).with(user._id, counter: 10).and_call_original }
+        before{ expect(User).to receive(:decrement).with(user._id, { counter: 10 }, refresh: true).and_call_original }
         specify{ expect{ user.decrement({ counter: 10 }, atomic: true) }.to change{ user.counter }.from(0).to(-10) }
         specify{ expect{ user.decrement({ counter: 10 }, atomic: true) }.to change{
           User.find(user._id).counter
