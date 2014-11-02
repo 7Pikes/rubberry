@@ -12,7 +12,7 @@ Rubberry.configure do |c|
   c.refresh = true
 
   c.client.hosts = ['localhost:9250']
-  c.client.log = true
+  c.client.log = false
 
   c.index.number_of_shards = 1
   c.index.number_of_replicas = 0
