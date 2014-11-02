@@ -56,35 +56,3 @@ module Rubberry
     end
   end
 end
-
-
-      # def update_counters(id, counters, operation)
-      #   result = []
-      #   counters = [counters] unless counters.respond_to?(:each)
-      #   counters.each do |counter, value|
-      #     value = prepare_counter_value(value ||= 1, operation)
-      #     result << "if(isdef ctx._source.#{counter}){ ctx._source.#{counter} += #{value} } " \
-      #               "else { ctx._source.#{counter} = #{value} }"
-      #   end
-
-      #   connection.update(
-      #     index: index_name, type: type_name, id: id, body: { script: result.join('; ') }, refresh: config.refresh
-      #   )
-      #   true
-      # rescue Elasticsearch::Transport::Transport::Errors::NotFound => e
-      #   raise DocumentNotFound.new("Couldn't find #{name} with an ID (#{id})")
-      # rescue Elasticsearch::Transport::Transport::Errors::BadRequest => e
-      #   raise e if e.message !~ /dynamic scripting disabled/
-      #   raise DynamicScriptingDisabled.new
-      # end
-
-      # def prepare_counter_value(value, operation)
-      #   case
-      #   when operation == '-' && !value.to_s.start_with?('-')
-      #     "-#{value}"
-      #   when operation == '-'
-      #     value.to_s.gsub('-', '')
-      #   else
-      #     value
-      #   end
-      # end
