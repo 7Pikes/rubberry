@@ -2,6 +2,8 @@
 
 The ODM functionality for ElasticSearch documents. It works with ElasticSearch like with primary database, without any external models, such as ActiveRecord or Mongoid.
 
+[![Build Status](https://travis-ci.org/undr/rubberry.svg?branch=master)](https://travis-ci.org/undr/rubberry)
+
 ## Installation
 
 Add this line to your application's Gemfile:
