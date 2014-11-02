@@ -6,6 +6,7 @@ require 'elasticsearch'
 require 'pp'
 
 require 'rubberry/version'
+require 'rubberry/extensions'
 require 'rubberry/configuration'
 require 'rubberry/connection_manager'
 require 'rubberry/errors'
