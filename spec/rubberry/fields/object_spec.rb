@@ -35,7 +35,7 @@ describe Rubberry::Fields::Object do
     specify{ expect(subject.type_cast(
       'title' => 'Title', 'last' => 'Great', 'created_at' => Time.now, 'author' => { name: 'Undr' }
     ).elasticize).to eq(
-      'title' => 'Title', 'created_at' => '2014-10-29T15:30:05.123', 'author' => { 'name' => 'Undr' }
+      'title' => 'Title', 'created_at' => '2014-10-29T08:30:05.123', 'author' => { 'name' => 'Undr' }
     ) }
   end
 end
