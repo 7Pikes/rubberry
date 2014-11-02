@@ -7,12 +7,12 @@ require 'pp'
 Dir['./spec/support/**/*.rb'].each{|f| require f }
 
 Rubberry.configure do |c|
-  c.wait_for_status = 'green'
+  c.wait_for_status = 'yellow'
   c.wait_for_status_timeout = '5s'
   c.refresh = true
 
   c.client.hosts = ['localhost:9250']
-  c.client.log = false
+  c.client.log = true
 
   c.index.number_of_shards = 1
   c.index.number_of_replicas = 0
