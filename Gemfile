@@ -5,4 +5,4 @@ gemspec
 
 gem 'pry'
 gem 'timecop'
-gem 'elasticsearch-extensions'
+gem 'elasticsearch-extensions', git: 'https://github.com/elasticsearch/elasticsearch-ruby'
