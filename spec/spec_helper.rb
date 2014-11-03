@@ -7,7 +7,7 @@ require 'pp'
 Dir['./spec/support/**/*.rb'].each{|f| require f }
 
 Rubberry.configure do |c|
-  c.wait_for_status = 'yellow'
+  c.wait_for_status = 'green'
   c.wait_for_status_timeout = '5s'
   c.refresh = true
 
