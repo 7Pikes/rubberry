@@ -6,10 +6,10 @@ module Rubberry
       def initialize(document, options = {})
         @options = options
         @document = document
-        options[:refresh] = config.refresh unless options.has_key?(:refresh) && config.refresh?
         @atomic = options.delete(:atomic)
         @counters = options.delete(:counters)
         @operation = options.delete(:operation) || '+'
+        options[:refresh] = config.refresh if !options.has_key?(:refresh) && config.refresh?
       end
 
       def perform

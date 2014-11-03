@@ -8,14 +8,14 @@ module Rubberry
       def increment(id, counters, options = {})
         options[:id] = id
         options[:counters] = counters
-        Operations::AtomicIncrement.new(self, options).perform
+        Operations::Atomic::Increment.new(self, options).perform
       end
 
       def decrement(id, counters, options = {})
         options[:id] = id
         options[:operation] = '-'
         options[:counters] = counters
-        Operations::AtomicIncrement.new(self, options).perform
+        Operations::Atomic::Increment.new(self, options).perform
       end
 
       def create(attributes, options = {})
