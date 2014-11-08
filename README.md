@@ -101,6 +101,72 @@ Configuration from two files (`config/rubbery.yml` and `config/rubberry.local.ym
 
 ### Defining models
 
+It's pretty easy. Define class inherited from `Rubberry::Base`. Define index name and index type if it necessary. Define mappings. That's all.
+
+```ruby
+class User < Rubberry::Base
+  index_name :all_users
+  type_name :user
+  
+  mappings do
+    field :name
+    field :email, analyzer: 'email'
+    field :birthday, type: 'date', format: 'date', include_in_all: false
+    field :tags, array: true, default: ['user']
+    field :rating, type: 'integer', default: 0
+    field :superhero, type: 'boolean', default: false
+  end
+  
+  validates :email, :tags, presence: true
+end
+```
+
+Fields options are the same as ES options, except two options: `:default` and `:array`. The `:default` option sets value by default, that will be stored in ES if no value assigned to field. The `:array` option defines array field. It means all values that assigned to this field will be changed to array.
+
+```ruby
+user = User.new(name: 'Undr', email: 'undr@server.com')
+user.rating
+# => 0
+user.tags
+# => ['user']
+user.tags = 'super user'
+user.tags
+# => ['super user']
+```
+
+Also It's possible to define some metadata fields such as `_analyzer`, `_ttl` or `_timestamp` and root settings.
+ 
+```ruby
+class User < Rubberry::Base
+  index_name :all_users
+  type_name :user
+  
+  mappings do
+    _ttl enabled: true, default: '8w'
+    _timestamp enabled: true
+    
+    index_analyzer 'standard'
+    search_analyzer 'standard'
+    dynamic_template :template1,
+      path_match: 'about.*',
+      mappings: { type: 'string', analyzer: 'standard' }
+    
+    field :name
+    field :email, analyzer: 'email'
+    field :birthday, type: 'date', format: 'date', include_in_all: false
+    field :tags, array: true, default: ['user']
+    field :rating, type: 'integer', default: 0, index: false
+    field :superhero, type: 'boolean', default: false, index: false
+    
+    # Field will accept hash values: user.about = { 'ru' => 'Реальный пацан', 'en' => 'Cool guy' }
+    field :about, type: 'object' 
+  end
+  
+  validates :email, :tags, presence: true
+end
+```
+### CRUD operations
+
 There is nothing here yet. Look at the code.
 
 ## Contributing
