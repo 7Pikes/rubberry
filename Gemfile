@@ -6,3 +6,4 @@ gemspec
 gem 'pry'
 gem 'timecop'
 gem 'elasticsearch-extensions', git: 'https://github.com/elasticsearch/elasticsearch-ruby'
+gem "codeclimate-test-reporter", group: :test, require: nil

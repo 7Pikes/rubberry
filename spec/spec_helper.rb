@@ -3,6 +3,9 @@ ENV['RACK_ENV'] = 'test'
 require 'rubberry'
 require 'timecop'
 require 'pp'
+require "codeclimate-test-reporter"
+
+CodeClimate::TestReporter.start
 
 Dir['./spec/support/**/*.rb'].each{|f| require f }
 
