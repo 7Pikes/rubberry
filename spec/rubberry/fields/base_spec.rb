@@ -64,11 +64,20 @@ describe Rubberry::Fields::Base do
     specify{ expect(subject.type_cast('value')).to eq('value') }
     specify{ expect(subject.type_cast('value')).to be_value_proxy }
     specify{ expect(subject.type_cast('value')).to respond_to(:elasticize) }
+    specify{ expect(subject.type_cast('value') || 'o').to eq('value') }
 
     context 'with nil' do
       specify{ expect(subject.type_cast(nil)).to be_nil }
-      specify{ expect(subject.type_cast(nil)).to be_value_proxy }
+      specify{ expect(subject.type_cast(nil)).not_to be_value_proxy }
       specify{ expect(subject.type_cast(nil)).to respond_to(:elasticize) }
+      specify{ expect(subject.type_cast(nil) || 'o').to eq('o') }
+    end
+
+    context 'with false' do
+      specify{ expect(subject.type_cast(false)).to be_falsy }
+      specify{ expect(subject.type_cast(false)).not_to be_value_proxy }
+      specify{ expect(subject.type_cast(false)).to respond_to(:elasticize) }
+      specify{ expect(subject.type_cast(false) || 'o').to eq('o') }
     end
 
     context 'with arrayed field' do
@@ -84,8 +93,16 @@ describe Rubberry::Fields::Base do
 
       context 'with nil' do
         specify{ expect(subject.type_cast(nil)).to be_nil }
-        specify{ expect(subject.type_cast(nil)).to be_value_proxy }
+        specify{ expect(subject.type_cast(nil)).not_to be_value_proxy }
         specify{ expect(subject.type_cast(nil)).to respond_to(:elasticize) }
+        specify{ expect(subject.type_cast(nil) || 'o').to eq('o') }
+      end
+
+      context 'with false' do
+        specify{ expect(subject.type_cast(false)).to eq([false]) }
+        specify{ expect(subject.type_cast(false)).to be_value_proxy }
+        specify{ expect(subject.type_cast(false)).to respond_to(:elasticize) }
+        specify{ expect(subject.type_cast(false) || 'o').to eq([false]) }
       end
     end
   end
@@ -96,11 +113,13 @@ describe Rubberry::Fields::Base do
     specify{ expect(subject.read_value('value', object)).to eq('value') }
     specify{ expect(subject.read_value('value', object)).to be_value_proxy }
     specify{ expect(subject.read_value('value', object)).to respond_to(:elasticize) }
+    specify{ expect(subject.read_value('value', object) || 'o').to eq('value') }
 
     context 'with nil' do
       specify{ expect(subject.read_value(nil, object)).to be_nil }
-      specify{ expect(subject.read_value(nil, object)).to be_value_proxy }
+      specify{ expect(subject.read_value(nil, object)).not_to be_value_proxy }
       specify{ expect(subject.read_value(nil, object)).to respond_to(:elasticize) }
+      specify{ expect(subject.read_value(nil, object) || 'o').to eq('o') }
 
       context 'when default value exists' do
         let(:options){ { default: 'default' } }
@@ -109,6 +128,13 @@ describe Rubberry::Fields::Base do
         specify{ expect(subject.read_value(nil, object)).to be_value_proxy }
         specify{ expect(subject.read_value(nil, object)).to respond_to(:elasticize) }
       end
+    end
+
+    context 'with false' do
+      specify{ expect(subject.read_value(false, object)).to be_falsy }
+      specify{ expect(subject.read_value(false, object)).not_to be_value_proxy }
+      specify{ expect(subject.read_value(false, object)).to respond_to(:elasticize) }
+      specify{ expect(subject.read_value(false, object) || 'o').to eq('o') }
     end
 
     context 'with arrayed field' do
@@ -124,8 +150,9 @@ describe Rubberry::Fields::Base do
 
       context 'with nil' do
         specify{ expect(subject.read_value(nil, object)).to be_nil }
-        specify{ expect(subject.read_value(nil, object)).to be_value_proxy }
+        specify{ expect(subject.read_value(nil, object)).not_to be_value_proxy }
         specify{ expect(subject.read_value(nil, object)).to respond_to(:elasticize) }
+        specify{ expect(subject.read_value(nil, object) || 'o').to eq('o') }
 
         context 'when default value exists' do
           let(:options){ { array: true, default: 'default' } }
@@ -134,6 +161,13 @@ describe Rubberry::Fields::Base do
           specify{ expect(subject.read_value(nil, object)).to be_value_proxy }
           specify{ expect(subject.read_value(nil, object)).to respond_to(:elasticize) }
         end
+      end
+
+      context 'with false' do
+        specify{ expect(subject.read_value(false, object)).to eq([false]) }
+        specify{ expect(subject.read_value(false, object)).to be_value_proxy }
+        specify{ expect(subject.read_value(false, object)).to respond_to(:elasticize) }
+        specify{ expect(subject.read_value(false, object) || 'o').to eq([false]) }
       end
     end
   end
@@ -148,7 +182,7 @@ describe Rubberry::Fields::Base do
     context 'with nil' do
       specify{ expect(subject.read_value_before_type_cast(nil, object)).to be_nil }
       specify{ expect(subject.read_value_before_type_cast(nil, object)).not_to be_value_proxy }
-      specify{ expect(subject.read_value_before_type_cast(nil, object)).not_to respond_to(:elasticize) }
+      specify{ expect(subject.read_value_before_type_cast(nil, object)).to respond_to(:elasticize) }
 
       context 'when default value exists' do
         let(:options){ { default: 'default' } }
@@ -173,7 +207,7 @@ describe Rubberry::Fields::Base do
       context 'with nil' do
         specify{ expect(subject.read_value_before_type_cast(nil, object)).to be_nil }
         specify{ expect(subject.read_value_before_type_cast(nil, object)).not_to be_value_proxy }
-        specify{ expect(subject.read_value_before_type_cast(nil, object)).not_to respond_to(:elasticize) }
+        specify{ expect(subject.read_value_before_type_cast(nil, object)).to respond_to(:elasticize) }
 
         context 'when default value exists' do
           let(:options){ { array: true, default: 'default' } }

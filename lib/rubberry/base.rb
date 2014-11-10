@@ -10,7 +10,7 @@ module Rubberry
     include Fields
     include Finders
     include Stateful
-    include Persistence
+    include Persistable
     include Expirable
     include Validations
 

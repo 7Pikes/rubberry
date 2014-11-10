@@ -1,6 +1,9 @@
 module Rubberry
-  module Operations
+  module Commands
     class Update < Base
+      include Common
+      include Persistable::Updatable::Command
+
       option(:refresh).allow(true, false)
       option(:consistency).allow(:one, :quorum, :all, 'one', 'quorum', 'all')
       option(:replication).allow(:sync, :async, 'sync', 'async')
@@ -18,27 +21,17 @@ module Rubberry
         true
       end
 
-      private
-
       def request
-        { index: model.index_name, type: model.type_name, id: document._id, body: { doc: attributes } }.merge(options)
+        { index: model.index_name, type: model.type_name, id: document._id, body: { doc: attributes } }.
+          merge(request_options)
       end
+
+      private
 
       def update_document
         connection.update(request)
       rescue Elasticsearch::Transport::Transport::Errors::NotFound => e
         raise DocumentNotFound.new("Couldn't find #{model.name} with an ID (#{document._id})")
-      end
-
-      def change_document_state!
-        document.instance_exec do
-          @previously_changed = changes
-          @changed_attributes.clear
-        end
-      end
-
-      def attributes
-        document.elasticated_attributes.slice(*document.changed)
       end
     end
   end

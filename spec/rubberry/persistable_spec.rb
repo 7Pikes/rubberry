@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Rubberry::Persistence do
+describe Rubberry::Persistable do
   before do
     stub_model('User') do
       mappings do
@@ -14,7 +14,7 @@ describe Rubberry::Persistence do
   after{ User.index.delete }
 
   describe '.create' do
-    let!(:user){ User.create(name: 'Undr') }
+    let(:user){ User.create(name: 'Undr') }
 
     subject{ user }
 
@@ -27,6 +27,17 @@ describe Rubberry::Persistence do
 
     context 'stored object' do
       subject{ User.find(user._id) }
+
+      specify{ expect(subject).not_to be_new_record }
+      specify{ expect(subject).to be_persisted }
+      specify{ expect(subject).not_to be_changed }
+      specify{ expect(subject._id).not_to be_nil }
+      specify{ expect(subject._version).to eq(1) }
+      specify{ expect(subject.name).to eq('Undr') }
+    end
+
+    context 'bulk' do
+      subject{ Rubberry.bulk{ User.create(name: 'Undr') }.first }
 
       specify{ expect(subject).not_to be_new_record }
       specify{ expect(subject).to be_persisted }
@@ -246,6 +257,8 @@ describe Rubberry::Persistence do
       specify{ expect(user.save).to be_falsy }
       specify{ expect(user.reload.name).to eq('Undr') }
     end
+
+
   end
 
   describe '#save!' do
@@ -317,14 +330,32 @@ describe Rubberry::Persistence do
 
     subject{ user }
 
-    before{ user.delete }
-
-    specify{ expect(subject).not_to be_persisted }
-    specify{ expect(subject).to be_destroyed }
+    context do
+      before{ user.delete }
+      specify{ expect(subject).not_to be_persisted }
+      specify{ expect(subject).to be_destroyed }
+    end
 
     context do
+      before{ user.delete }
       subject{ User.find(user._id) }
       specify{ expect(subject).to be_nil }
+    end
+
+    context 'bulk' do
+      subject do
+        user
+        Rubberry.bulk{ user.delete }.first
+      end
+
+      specify{ expect(subject).to be_destroyed }
+      specify{ expect(subject).not_to be_persisted }
+      specify{ expect(subject).to eq(user) }
+
+      context do
+        before{ subject }
+        specify{ expect(User.find(user._id)).to be_nil }
+      end
     end
   end
 
@@ -359,7 +390,7 @@ describe Rubberry::Persistence do
       after{ User.config.dynamic_scripting = false }
 
       context do
-        before{ expect(User).to receive(:increment).with(user._id, :counter, refresh: true).and_call_original }
+        before{ expect(User).to receive(:increment).with(user._id, [:counter], refresh: true).and_call_original }
         specify{ expect{ user.increment(:counter, atomic: true) }.to change{ user.counter }.from(0).to(1) }
         specify{ expect{ user.increment(:counter, atomic: true) }.to change{
           User.find(user._id).counter
@@ -373,6 +404,21 @@ describe Rubberry::Persistence do
           User.find(user._id).counter
         }.from(0).to(10) }
       end
+    end
+
+    context 'bulk' do
+      subject do
+        user
+        Rubberry.bulk{ user.increment(:counter) }.first
+      end
+
+      specify{ expect(subject).not_to be_new_record }
+      specify{ expect(subject).to be_persisted }
+      specify{ expect(subject).not_to be_changed }
+      specify{ expect(subject._id).not_to be_nil }
+      specify{ expect(subject._version).to eq(2) }
+      specify{ expect(subject.counter).to eq(1) }
+      specify{ expect(subject).to eq(user) }
     end
   end
 
@@ -407,7 +453,7 @@ describe Rubberry::Persistence do
       after{ User.config.dynamic_scripting = false }
 
       context do
-        before{ expect(User).to receive(:decrement).with(user._id, :counter, refresh: true).and_call_original }
+        before{ expect(User).to receive(:decrement).with(user._id, [:counter], refresh: true).and_call_original }
         specify{ expect{ user.decrement(:counter, atomic: true) }.to change{ user.counter }.from(0).to(-1) }
         specify{ expect{ user.decrement(:counter, atomic: true) }.to change{
           User.find(user._id).counter
@@ -422,6 +468,21 @@ describe Rubberry::Persistence do
         }.from(0).to(-10) }
       end
     end
+
+    context 'bulk' do
+      subject do
+        user
+        Rubberry.bulk{ user.decrement(:counter) }.first
+      end
+
+      specify{ expect(subject).not_to be_new_record }
+      specify{ expect(subject).to be_persisted }
+      specify{ expect(subject).not_to be_changed }
+      specify{ expect(subject._id).not_to be_nil }
+      specify{ expect(subject._version).to eq(2) }
+      specify{ expect(subject.counter).to eq(-1) }
+      specify{ expect(subject).to eq(user) }
+    end
   end
 
   describe '#update_attribute' do
@@ -429,6 +490,26 @@ describe Rubberry::Persistence do
 
     specify{ expect{ user.update_attribute(:name, 'Arny') }.to change{ user.name }.from('Undr').to('Arny') }
     specify{ expect{ user.update_attribute(:name, 'Arny') }.to change{ user.reload.name }.from('Undr').to('Arny') }
+
+    context 'bulk' do
+      subject do
+        user
+        Rubberry.bulk{ user.update_attribute(:name, 'Arny') }.first
+      end
+
+
+
+      specify{ expect(subject).to be_persisted }
+      specify{ expect(subject).not_to be_changed }
+      specify{ expect(subject._version).to eq(2) }
+      specify{ expect(subject.name).to eq('Arny') }
+      specify{ expect(subject).to eq(user) }
+
+      context do
+        before{ subject }
+        specify{ expect(User.find(user._id).name).to eq('Arny') }
+      end
+    end
   end
 
   describe '#update_attributes' do
@@ -449,6 +530,26 @@ describe Rubberry::Persistence do
     specify{ expect{
       user.update_attributes(name: 'Arny', counter: 10)
     }.to change{ user.reload.counter }.from(0).to(10) }
+
+    context 'bulk' do
+      subject do
+        user
+        Rubberry.bulk{ user.update_attributes(name: 'Arny', counter: 10) }.first
+      end
+
+      specify{ expect(subject).to be_persisted }
+      specify{ expect(subject).not_to be_changed }
+      specify{ expect(subject._version).to eq(2) }
+      specify{ expect(subject.name).to eq('Arny') }
+      specify{ expect(subject.counter).to eq(10) }
+      specify{ expect(subject).to eq(user) }
+
+      context do
+        before{ subject }
+        specify{ expect(User.find(user._id).name).to eq('Arny') }
+        specify{ expect(User.find(user._id).counter).to eq(10) }
+      end
+    end
   end
 
   describe '#reload' do

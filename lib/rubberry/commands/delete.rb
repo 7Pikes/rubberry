@@ -1,6 +1,9 @@
 module Rubberry
-  module Operations
+  module Commands
     class Delete < Base
+      include Common
+      include Persistable::Destroyable::Command
+
       option(:refresh).allow(true, false)
       option(:consistency).allow(:one, :quorum, :all, 'one', 'quorum', 'all')
       option(:replication).allow(:sync, :async, 'sync', 'async')
@@ -15,22 +18,16 @@ module Rubberry
         true
       end
 
-      private
-
       def request
-        { index: model.index_name, type: model.type_name, id: document._id }.merge(options)
+        { index: model.index_name, type: model.type_name, id: document._id }.merge(request_options)
       end
+
+      private
 
       def delete_document
         connection.delete(request)
       rescue Elasticsearch::Transport::Transport::Errors::NotFound => e
         { '_version' => document._version + 1 }
-      end
-
-      def change_document_state!
-        document.instance_exec do
-          @destroyed = true
-        end
       end
     end
   end

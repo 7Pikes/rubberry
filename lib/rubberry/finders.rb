@@ -2,8 +2,8 @@ module Rubberry
   module Finders
     extend ActiveSupport::Concern
 
-    CONTEXT_METHODS = %w{delete_all timeout count first explain version query_mode filter_mode post_filter_mode
-      limit offset highlight rescore script_score boost_factor random_score field_value_factor decay suggest none
+    CONTEXT_METHODS = %w{timeout count first explain version query_mode filter_mode post_filter_mode limit
+      offset highlight rescore script_score boost_factor random_score field_value_factor decay suggest none
       strategy query filter post_filter boost_mode score_mode order reorder only only!}.freeze
 
     module ClassMethods

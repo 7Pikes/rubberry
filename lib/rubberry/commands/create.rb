@@ -1,6 +1,9 @@
 module Rubberry
-  module Operations
+  module Commands
     class Create < Base
+      include Common
+      include Persistable::Creatable::Command
+
       option(:refresh).allow(true, false)
       option(:consistency).allow(:one, :quorum, :all, 'one', 'quorum', 'all')
       option(:replication).allow(:sync, :async, 'sync', 'async')
@@ -17,28 +20,14 @@ module Rubberry
         true
       end
 
-      private
-
       def request
-        { index: model.index_name, type: model.type_name, body: attributes }.merge(options)
+        { index: model.index_name, type: model.type_name, body: attributes }.merge(request_options)
       end
+
+      private
 
       def save_document
         connection.create(request)
-      end
-
-      def change_document_state!
-        document.instance_exec do
-          @previously_changed = changes
-          @changed_attributes.clear
-          @new_record = false
-        end
-      end
-
-      def attributes
-        document.elasticated_attributes.tap do
-          options[:ttl] = document.class.document_ttl if document.class.document_ttl? && !options.has_key?(:ttl)
-        end
       end
     end
   end

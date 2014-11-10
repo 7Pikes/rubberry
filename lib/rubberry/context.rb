@@ -16,16 +16,12 @@ module Rubberry
     end
 
     def first(size = nil)
-      if loaded?
-        size ? collection.first(size) : collection.first
-      else
-        col = limit(size || 1).collection
-        size ? col.first(size) : col.first
-      end
+      collection = loaded? ? self.collection : limit(size || 1).collection
+      size ? collection.first(size) : collection.first
     end
 
     def count
-      loaded? ? collection.size : count_response
+      loaded? ? collection.size : count_query_response
     end
 
     def facets(params = nil)
@@ -50,8 +46,8 @@ module Rubberry
       response['timed_out']
     end
 
-    def delete_all
-      delete_all_response
+    def delete_all(options = {})
+      Commands.build('DeleteAll', self, options).perform
     end
 
     def loaded?
@@ -64,50 +60,26 @@ module Rubberry
       end
     end
 
-    private
-
-    def count_response
-      @count_response ||= instrument('count_query.rubberry', count_request) do
-        begin
-          criteria.none? ? 0 : model.connection.count(count_request)['count']
-        rescue Elasticsearch::Transport::Transport::Errors::NotFound => e
-          raise e if e.message !~ /IndexMissingException/
-          0
-        end
-      end
-    end
-
-    def reset
-      super
-      @response, @delete_all_response, @collection, @count_response = nil
-    end
-
-    def response
-      @response ||= instrument('search_query.rubberry', request) do
-        begin
-          model.connection.search(request)
-        rescue Elasticsearch::Transport::Transport::Errors::NotFound => e
-          raise e if e.message !~ /IndexMissingException/
-          {}
-        end
-      end
-    end
-
-    def delete_all_response
-      @delete_all_response ||= instrument('delete_query.rubberry', delete_all_request) do
-        model.connection.delete_by_query(delete_all_request)
-      end unless criteria.none?
-    end
-
-    def instrument(name, request_body, &block)
-      ActiveSupport::Notifications.instrument(name, request: request_body, model: model, &block)
-    end
-
-    def count_request
+    def count_query_request
       { index: model.index_name, type: types }.tap do |h|
         request_query = request[:body][:query]
         h[:body] = { query: request_query } if request_query
       end
+    end
+
+    private
+
+    def reset
+      super
+      @response, @collection, @count_query_response = nil
+    end
+
+    def count_query_response
+      @count_query_response ||= Commands.build('CountQuery', self).perform
+    end
+
+    def response
+      @response ||= Commands.build('Query', self).perform
     end
   end
 end

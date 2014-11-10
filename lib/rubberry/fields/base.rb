@@ -8,11 +8,11 @@ module Rubberry
         # TODO: override all methods that change internal state of array.
         # They should keep objects as proxy.
         def objectize(value)
-          ::Array.wrap(value).flatten.map{|v| _field.proxy(v, _field) }
+          ::Array.wrap(value).flatten.map{|v| __field__.proxy(v, __field__) }
         end
 
         def elasticize
-          return nil if _target.nil?
+          return nil if __target__.nil?
           _target.map(&:elasticize)
         end
       end

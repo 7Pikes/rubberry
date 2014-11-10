@@ -3,9 +3,24 @@ module Rubberry
     class Proxy < BasicObject
       SELF_METHODS = %w{objectize elasticize value_proxy?}
 
+      class << self
+        def new(target, field)
+          case target
+          when NilClass
+            nil
+          when FalseClass
+            field.as_array? ? super : false
+          else
+            super
+          end
+        end
+      end
+
+      attr_reader :__target__
+
       def initialize(target, field)
-        @_field = field
-        @_target = objectize(target) unless target.nil?
+        @__field__ = field
+        @__target__ = objectize(target) unless target.nil?
       end
 
       def objectize(value)
@@ -13,19 +28,19 @@ module Rubberry
       end
 
       def elasticize
-        _target
+        __target__
       end
 
       def ==(other)
-        _target == other
+        super || equal_proxy?(other) || __target__ == other
       end
 
       def method_missing(method_name, *args, &block)
-        _target.respond_to?(method_name) ? _target.send(method_name, *args, &block) : super
+        __target__.respond_to?(method_name) ? __target__.send(method_name, *args, &block) : super
       end
 
       def respond_to_missing?(method_name, p = false)
-        SELF_METHODS.include?(method_name.to_s) || _target.respond_to?(method_name, p)
+        SELF_METHODS.include?(method_name.to_s) || __target__.respond_to?(method_name, p)
       end
 
       def respond_to?(method_name, p = false)
@@ -38,7 +53,11 @@ module Rubberry
 
       private
 
-      attr_reader :_target, :_field
+      def equal_proxy?(other)
+        other.value_proxy? && other.__target__ == __target__
+      end
+
+      attr_reader :__field__
     end
   end
 end
@@ -48,3 +67,16 @@ class Object
     false
   end
 end
+
+class NilClass
+  def elasticize
+    nil
+  end
+end
+
+class FalseClass
+  def elasticize
+    false
+  end
+end
+

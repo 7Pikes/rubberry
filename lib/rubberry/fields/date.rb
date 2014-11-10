@@ -137,8 +137,8 @@ module Rubberry
         end
 
         def elasticize
-          return nil unless _target
-          _target.strftime(FORMATS[format] || '%Y-%m-%dT%H:%M:%S.%L')
+          return nil unless __target__
+          __target__.strftime(FORMATS[format] || '%Y-%m-%dT%H:%M:%S.%L')
         end
 
         private
@@ -148,7 +148,7 @@ module Rubberry
         end
 
         def format
-          _field.options[:format]
+          __field__.options[:format]
         end
       end
     end

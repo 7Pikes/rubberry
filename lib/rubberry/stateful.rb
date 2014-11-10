@@ -5,12 +5,18 @@ module Rubberry
       @new_record = true
       @destroyed = false
       @readonly = false
+      @bulked = false
     end
 
     def init_with(*)
       @new_record = false
       @destroyed = false
       @readonly = false
+      @bulked = false
+    end
+
+    def bulked?
+      @bulked
     end
 
     def updatable?
@@ -18,11 +24,11 @@ module Rubberry
     end
 
     def creatable?
-      changed? && new_record?
+      changed? && new_record? && !bulked?
     end
 
     def destroyable?
-      persisted?
+      persisted? && !bulked?
     end
 
     def readonly?

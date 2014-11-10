@@ -14,8 +14,8 @@ module Rubberry
         end
 
         def elasticize
-          return nil if _target.nil?
-          ::Base64.encode64(_target.read)
+          return nil if __target__.nil?
+          ::Base64.encode64(__target__.read)
         end
       end
     end
