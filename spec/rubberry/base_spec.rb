@@ -4,7 +4,7 @@ describe Rubberry::Base do
   subject{ stub_model('User::CustomEvent') }
 
   describe '.index_name' do
-    specify{ expect(subject.index_name).to eq('test_user_custom_events') }
+    specify{ expect(subject.index_name).to eq('test_users') }
 
     context do
       before{ subject.index_name('events') }
@@ -13,7 +13,7 @@ describe Rubberry::Base do
   end
 
   describe '.type_name' do
-    specify{ expect(subject.type_name).to eq('user_custom_event') }
+    specify{ expect(subject.type_name).to eq('custom_event') }
 
     context do
       before{ subject.type_name('event') }
@@ -27,6 +27,24 @@ describe Rubberry::Base do
     context do
       before{ subject.document_ttl('8w') }
       specify{ expect(subject.document_ttl).to eq('8w') }
+    end
+  end
+
+  describe '.document_ttl?' do
+    specify{ expect(subject.document_ttl?).to be_falsy }
+
+    context do
+      before{ subject.document_ttl('8w') }
+      specify{ expect(subject.document_ttl?).to be_truthy }
+    end
+  end
+
+  describe '.abstract?' do
+    specify{ expect(subject.abstract?).to be_falsy }
+
+    context do
+      before{ subject.abstract! }
+      specify{ expect(subject.abstract?).to be_truthy }
     end
   end
 

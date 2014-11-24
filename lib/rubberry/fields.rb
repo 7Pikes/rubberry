@@ -32,6 +32,7 @@ module Rubberry
       def inherited(subclass)
         subclass._mappings = _mappings.clone
         subclass._mappings.model = subclass
+        super
       end
 
       def mappings(&block)

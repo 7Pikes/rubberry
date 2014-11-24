@@ -52,6 +52,21 @@ module Rubberry
   def bulk?
     !bulk.bunch.nil?
   end
+
+  def indices
+    index_models.keys.map{|index_name| Index.new(index_name) }
+  end
+
+  def index_models
+    Rubberry::Base.inherited_models.reject(&:abstract?).inject(Hash.new{|h, k| h[k] = [] }) do |result, model|
+      result[model.index_name.to_s] << model if Object.const_defined?(model.name)
+      result
+    end
+  end
+
+  def mappings_for(index)
+    Rubberry.index_models[index].map(&:mappings_hash).inject(&:merge)
+  end
 end
 
 ActiveSupport.on_load(:i18n) do
