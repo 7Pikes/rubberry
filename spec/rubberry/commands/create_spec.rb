@@ -1,25 +1,16 @@
 require 'spec_helper'
 
-describe Rubberry::Commands::Create do
-  before do
-    stub_model('User') do
-      mappings do
-        field :name
-      end
-    end
-    User.index.create
-  end
-
-  after{ User.index.delete }
-
-  let(:user){ User.new(name: 'Undr') }
+describe Rubberry::Commands::Create, index_model: UserEvent do
+  let(:user){ UserEvent.new(name: 'Undr') }
 
   describe '#request' do
     let(:options){ {} }
 
     subject{ Rubberry::Commands::Create.new(user, options).request }
 
-    specify{ expect(subject).to eq(index: 'test_users', type: 'user', body: { 'name' => 'Undr' }, refresh: true) }
+    specify{ expect(subject).to eq(
+      index: 'test_user_events', type: 'user_event', body: { 'name' => 'Undr' }, refresh: true
+    ) }
 
     context 'with options' do
       let(:time){ Time.now }
@@ -33,8 +24,8 @@ describe Rubberry::Commands::Create do
       } }
 
       specify{ expect(subject).to eq(
-        index: 'test_users',
-        type: 'user',
+        index: 'test_user_events',
+        type: 'user_event',
         body: { 'name' => 'Undr' },
         refresh: false,
         consistency: :all,
@@ -47,12 +38,12 @@ describe Rubberry::Commands::Create do
 
     context 'with document ttl' do
       before do
-        allow(User).to receive(:document_ttl).and_return('1w')
-        allow(User).to receive(:document_ttl?).and_return(true)
+        allow(UserEvent).to receive(:document_ttl).and_return('1w')
+        allow(UserEvent).to receive(:document_ttl?).and_return(true)
       end
 
       specify{ expect(subject).to eq(
-        index: 'test_users', type: 'user', body: { 'name' => 'Undr' }, refresh: true, ttl: '1w'
+        index: 'test_user_events', type: 'user_event', body: { 'name' => 'Undr' }, refresh: true, ttl: '1w'
       ) }
     end
 
@@ -78,7 +69,7 @@ describe Rubberry::Commands::Create do
       specify{ expect(user.changed?).to be_falsy }
       specify{ expect(user._id).not_to be_nil }
       specify{ expect(user._version).not_to be_nil }
-      specify{ expect(User.find(user._id)).not_to be_nil }
+      specify{ expect(UserEvent.find(user._id)).not_to be_nil }
     end
 
     context 'when document is not creatable' do
@@ -93,7 +84,7 @@ describe Rubberry::Commands::Create do
         specify{ expect(user.changed?).to be_truthy }
         specify{ expect(user._id).to be_nil }
         specify{ expect(user._version).to be_nil }
-        specify{ expect(User.find(user._id)).to be_nil }
+        specify{ expect(UserEvent.find(user._id)).to be_nil }
       end
     end
   end

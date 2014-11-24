@@ -1,32 +1,23 @@
 require 'spec_helper'
 
-describe Rubberry::Commands::Bulk::Create do
-  before do
-    stub_model('User') do
-      mappings do
-        field :name
-      end
-    end
-    User.index.create
-  end
-
-  after{ User.index.delete }
-
-  let(:user){ User.new(name: 'Undr') }
+describe Rubberry::Commands::Bulk::Create, index_model: UserEvent do
+  let(:user){ UserEvent.new(name: 'Undr') }
   let(:options){ {} }
 
   describe '#request' do
     subject{ Rubberry::Commands::Bulk::Create.new(user, options).request }
 
-    specify{ expect(subject).to eq('create' => { _index: 'test_users', _type: 'user', data: { 'name' => 'Undr' } }) }
+    specify{ expect(subject).to eq(
+      'create' => { _index: 'test_user_events', _type: 'user_event', data: { 'name' => 'Undr' } }
+    ) }
 
     context 'with options' do
       let(:time){ Time.now }
       let(:options){ { timestamp: time, ttl: '8w' } }
 
       specify{ expect(subject).to eq('create' => {
-        _index: 'test_users',
-        _type: 'user',
+        _index: 'test_user_events',
+        _type: 'user_event',
         data: { 'name' => 'Undr' },
         timestamp: time,
         ttl: '8w'
@@ -35,12 +26,12 @@ describe Rubberry::Commands::Bulk::Create do
 
     context 'with document ttl' do
       before do
-        allow(User).to receive(:document_ttl).and_return('1w')
-        allow(User).to receive(:document_ttl?).and_return(true)
+        allow(UserEvent).to receive(:document_ttl).and_return('1w')
+        allow(UserEvent).to receive(:document_ttl?).and_return(true)
       end
 
       specify{ expect(subject).to eq('create' => {
-        _index: 'test_users', _type: 'user', data: { 'name' => 'Undr' }, ttl: '1w'
+        _index: 'test_user_events', _type: 'user_event', data: { 'name' => 'Undr' }, ttl: '1w'
       }) }
     end
 

@@ -1,24 +1,13 @@
 require 'spec_helper'
 
-describe Rubberry::Commands::Bulk::Delete do
-  before do
-    stub_model('User') do
-      mappings do
-        field :name
-      end
-    end
-    User.index.create
-  end
-
-  after{ User.index.delete }
-
-  let(:user){ User.create(name: 'Undr') }
+describe Rubberry::Commands::Bulk::Delete, index_model: UserEvent do
+  let(:user){ UserEvent.create(name: 'Undr') }
   let(:options){ {} }
 
   describe '#request' do
     subject{ Rubberry::Commands::Bulk::Delete.new(user, options).request }
 
-    specify{ expect(subject).to eq('delete' => { _index: 'test_users', _type: 'user', _id: user._id }) }
+    specify{ expect(subject).to eq('delete' => { _index: 'test_user_events', _type: 'user_event', _id: user._id }) }
 
     context 'with invalid option' do
       let(:options){ { lalala: 'lalala' } }

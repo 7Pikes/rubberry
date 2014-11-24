@@ -1,12 +1,10 @@
 require 'spec_helper'
 
 describe Rubberry::Fields::Mappings do
-  let(:model){ stub_model('Model') }
-
-  subject{ Rubberry::Fields::Mappings.new(model) }
+  subject{ Rubberry::Fields::Mappings.new(EmptyModels) }
 
   describe '#initialize' do
-    specify{ expect(subject.model).to eq(model) }
+    specify{ expect(subject.model).to eq(EmptyModels) }
     specify{ expect(subject.dynamic_date_formats.to_a).to eq([]) }
     specify{ expect(subject.dynamic_templates.to_a).to eq([]) }
     specify{ expect(subject.fields).to eq({}) }
@@ -20,9 +18,9 @@ describe Rubberry::Fields::Mappings do
     end
 
     context 'with document ttl' do
-      before{ allow(model).to receive(:document_ttl).and_return('2s') }
+      before{ allow(EmptyModels).to receive(:document_ttl).and_return('2s') }
 
-      specify{ expect(subject.model).to eq(model) }
+      specify{ expect(subject.model).to eq(EmptyModels) }
       specify{ expect(subject.dynamic_date_formats.to_a).to eq([]) }
       specify{ expect(subject.dynamic_templates.to_a).to eq([]) }
       specify{ expect(subject.fields).to eq({}) }
@@ -75,7 +73,7 @@ describe Rubberry::Fields::Mappings do
     specify{ expect(subject.ttl_enabled?).to be_falsy }
 
     context 'with document ttl' do
-      before{ allow(model).to receive(:document_ttl).and_return('2s') }
+      before{ allow(EmptyModels).to receive(:document_ttl).and_return('2s') }
       specify{ expect(subject.ttl_enabled?).to be_truthy }
 
       context 'and turning ttl off' do
@@ -100,21 +98,21 @@ describe Rubberry::Fields::Mappings do
   end
 
   describe '#field' do
-    let(:field){ build_field(:name, type: 'string') }
+    let(:field){ build_field(:name1, type: 'string') }
 
     before{ allow(Rubberry::Fields).to receive(:build).with(anything, anything).and_return(field) }
 
     context 'when mappings does not contain root field' do
-      before{ subject.field(:name, type: 'string') }
+      before{ subject.field(:name1, type: 'string') }
 
-      specify{ expect(subject.fields).to eq('name' => field) }
-      specify{ expect(model.new).to respond_to(:name) }
-      specify{ expect(model.new).to respond_to(:name=) }
-      specify{ expect(model.new).to respond_to(:name?) }
-      specify{ expect(model.new).to respond_to(:highlighted_name) }
-      specify{ expect(model.new).to respond_to(:highlighted_name?) }
-      specify{ expect(model.new).to respond_to(:name_before_type_cast) }
-      specify{ expect(model.new).to respond_to(:name_default) }
+      specify{ expect(subject.fields).to eq('name1' => field) }
+      specify{ expect(EmptyModels.new).to respond_to(:name1) }
+      specify{ expect(EmptyModels.new).to respond_to(:name1=) }
+      specify{ expect(EmptyModels.new).to respond_to(:name1?) }
+      specify{ expect(EmptyModels.new).to respond_to(:highlighted_name1) }
+      specify{ expect(EmptyModels.new).to respond_to(:highlighted_name1?) }
+      specify{ expect(EmptyModels.new).to respond_to(:name1_before_type_cast) }
+      specify{ expect(EmptyModels.new).to respond_to(:name1_default) }
     end
 
     context 'when mappings contains root field' do
@@ -122,17 +120,17 @@ describe Rubberry::Fields::Mappings do
 
       before do
         subject.send(:stack).push(root)
-        subject.field(:name, type: 'string')
+        subject.field(:name2, type: 'string')
       end
 
       specify{ expect(root.children).to eq([field]) }
-      specify{ expect(model.new).not_to respond_to(:name) }
-      specify{ expect(model.new).not_to respond_to(:name=) }
-      specify{ expect(model.new).not_to respond_to(:name?) }
-      specify{ expect(model.new).not_to respond_to(:highlighted_name) }
-      specify{ expect(model.new).not_to respond_to(:highlighted_name?) }
-      specify{ expect(model.new).not_to respond_to(:name_before_type_cast) }
-      specify{ expect(model.new).not_to respond_to(:name_default) }
+      specify{ expect(EmptyModels.new).not_to respond_to(:name2) }
+      specify{ expect(EmptyModels.new).not_to respond_to(:name2=) }
+      specify{ expect(EmptyModels.new).not_to respond_to(:name2?) }
+      specify{ expect(EmptyModels.new).not_to respond_to(:highlighted_name2) }
+      specify{ expect(EmptyModels.new).not_to respond_to(:highlighted_name2?) }
+      specify{ expect(EmptyModels.new).not_to respond_to(:name2_before_type_cast) }
+      specify{ expect(EmptyModels.new).not_to respond_to(:name2_default) }
     end
   end
 
@@ -165,7 +163,7 @@ describe Rubberry::Fields::Mappings do
     end
 
     specify{ expect(subject.to_hash).to eq(
-      'model' => {
+      'empty_models' => {
         properties: { 'name' => { type: 'string'}, 'birthday' => { type: 'date' } },
         _all: { enabled: true },
         _analyzer: { path: 'analyzer'},

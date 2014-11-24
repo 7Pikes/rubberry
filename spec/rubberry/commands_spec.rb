@@ -1,17 +1,6 @@
 require 'spec_helper'
 
 describe Rubberry::Commands do
-  before do
-    stub_model('User') do
-      mappings do
-        field :name
-      end
-    end
-    User.index.create
-  end
-
-  after{ User.index.delete }
-
   let(:doc){ User.new }
 
   describe '.build' do

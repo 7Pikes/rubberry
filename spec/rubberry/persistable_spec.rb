@@ -1,18 +1,6 @@
 require 'spec_helper'
 
-describe Rubberry::Persistable do
-  before do
-    stub_model('User') do
-      mappings do
-        field :name
-        field :counter, type: 'integer', default: 0
-      end
-    end
-    User.index.create
-  end
-
-  after{ User.index.delete }
-
+describe Rubberry::Persistable, index_model: User do
   describe '.create' do
     let(:user){ User.create(name: 'Undr') }
 
@@ -496,8 +484,6 @@ describe Rubberry::Persistable do
         user
         Rubberry.bulk{ user.update_attribute(:name, 'Arny') }.first
       end
-
-
 
       specify{ expect(subject).to be_persisted }
       specify{ expect(subject).not_to be_changed }

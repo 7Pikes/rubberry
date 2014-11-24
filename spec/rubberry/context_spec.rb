@@ -1,17 +1,6 @@
 require 'spec_helper'
 
-describe Rubberry::Context do
-  before do
-    stub_model('User') do
-      mappings do
-        field :name
-      end
-    end
-    User.index.create
-  end
-
-  after{ User.index.delete }
-
+describe Rubberry::Context, index_model: User do
   let(:context){ Rubberry::Context.new(User, types: 'user') }
 
   before seed: true do

@@ -1,18 +1,7 @@
 require 'spec_helper'
 
-describe Rubberry::Commands::Bulk::Update do
-  before do
-    stub_model('User') do
-      mappings do
-        field :name
-      end
-    end
-    User.index.create
-  end
-
-  let(:user){ User.create(name: 'Undr').tap{|u| u.name = 'Arny' } }
-
-  after{ User.index.delete }
+describe Rubberry::Commands::Bulk::Update, index_model: UserEvent do
+  let(:user){ UserEvent.create(name: 'Undr').tap{|u| u.name = 'Arny' } }
 
   describe '#request' do
     subject{ Rubberry::Commands::Bulk::Update.new(user, options).request }
@@ -21,8 +10,8 @@ describe Rubberry::Commands::Bulk::Update do
       let(:options){ {} }
 
       specify{ expect(subject).to eq('update' => {
-        _index: 'test_users',
-        _type: 'user',
+        _index: 'test_user_events',
+        _type: 'user_event',
         _id: user._id,
         data: { doc: { 'name' => 'Arny' } }
       }) }
@@ -39,8 +28,8 @@ describe Rubberry::Commands::Bulk::Update do
       } }
 
       specify{ expect(subject).to eq('update' => {
-        _index: 'test_users',
-        _type: 'user',
+        _index: 'test_user_events',
+        _type: 'user_event',
         _id: user._id,
         data: { doc: { 'name' => 'Arny' } },
         _retry_on_conflict: 3,

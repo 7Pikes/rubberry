@@ -1,23 +1,10 @@
 require 'spec_helper'
 
-describe Rubberry::Commands::Bulk do
-  before do
-    stub_model('User') do
-      mappings do
-        field :name
-        field :handsome, type: 'boolean', default: true
-        field :counter, type: 'integer', default: 0
-      end
-    end
-    User.index.create
-  end
-
-  after{ User.index.delete }
-
-  let!(:user1){ User.new(name: 'Undr') }
-  let!(:user2){ User.create(name: 'Ammy').tap{|u| u.assign_attributes(name: 'Amy', counter: 10) } }
-  let!(:user3){ User.create(name: 'Rob') }
-  let!(:user4){ User.create(name: 'Ron') }
+describe Rubberry::Commands::Bulk, index_model: SomeUser do
+  let!(:user1){ SomeUser.new(name: 'Undr') }
+  let!(:user2){ SomeUser.create(name: 'Ammy').tap{|u| u.assign_attributes(name: 'Amy', counter: 10) } }
+  let!(:user3){ SomeUser.create(name: 'Rob') }
+  let!(:user4){ SomeUser.create(name: 'Ron') }
 
   describe '#request' do
     let(:options){ {} }
@@ -35,13 +22,15 @@ describe Rubberry::Commands::Bulk do
     end
 
     specify{ expect(subject.request).to eq(refresh: true, body: [
-      { 'create' => { _index: 'test_users', _type: 'user', data: { 'name' => 'Undr', 'handsome' => true, 'counter' => 0 } } },
-      { 'update' => {
-        _index: 'test_users', _type: 'user', _id: user2._id, data: { doc: { 'name' => 'Amy', 'counter' => 10 } }
+      { 'create' => {
+        _index: 'test_some_users', _type: 'user', data: { 'name' => 'Undr', 'handsome' => true, 'counter' => 0 }
       } },
-      { 'delete' => { _index: 'test_users', _type: 'user', _id: user3._id } },
       { 'update' => {
-        _index: 'test_users',
+        _index: 'test_some_users', _type: 'user', _id: user2._id, data: { doc: { 'name' => 'Amy', 'counter' => 10 } }
+      } },
+      { 'delete' => { _index: 'test_some_users', _type: 'user', _id: user3._id } },
+      { 'update' => {
+        _index: 'test_some_users',
         _type: 'user',
         _id: user4._id,
         data: { script: 'if(isdef ctx._source.counter){ ctx._source.counter += 1 } else { ctx._source.counter = 1 }' }
@@ -57,16 +46,20 @@ describe Rubberry::Commands::Bulk do
         replication: :sync,
         timeout: '10s',
         body: [
-          { 'create' => { _index: 'test_users', _type: 'user', data: { 'name' => 'Undr', 'handsome' => true, 'counter' => 0 } } },
-          { 'update' => {
-            _index: 'test_users', _type: 'user', _id: user2._id, data: { doc: { 'name' => 'Amy', 'counter' => 10 } }
+          { 'create' => {
+            _index: 'test_some_users', _type: 'user', data: { 'name' => 'Undr', 'handsome' => true, 'counter' => 0 }
           } },
-          { 'delete' => { _index: 'test_users', _type: 'user', _id: user3._id } },
           { 'update' => {
-            _index: 'test_users',
+            _index: 'test_some_users', _type: 'user', _id: user2._id, data: { doc: { 'name' => 'Amy', 'counter' => 10 } }
+          } },
+          { 'delete' => { _index: 'test_some_users', _type: 'user', _id: user3._id } },
+          { 'update' => {
+            _index: 'test_some_users',
             _type: 'user',
             _id: user4._id,
-            data: { script: 'if(isdef ctx._source.counter){ ctx._source.counter += 1 } else { ctx._source.counter = 1 }' }
+            data: {
+              script: 'if(isdef ctx._source.counter){ ctx._source.counter += 1 } else { ctx._source.counter = 1 }'
+            }
           } }
         ]
       ) }
@@ -106,7 +99,7 @@ describe Rubberry::Commands::Bulk do
       specify{ expect(user1.bulked?).to be_falsy }
       specify{ expect(user1._id).not_to be_nil }
       specify{ expect(user1._version).not_to be_nil }
-      specify{ expect(User.find(user1._id)).not_to be_nil }
+      specify{ expect(SomeUser.find(user1._id)).not_to be_nil }
 
       specify{ expect(user2.name).to eq('Amy') }
       specify{ expect(user2.changed?).to be_falsy }
@@ -115,7 +108,7 @@ describe Rubberry::Commands::Bulk do
 
       specify{ expect(user3).to be_destroyed }
       specify{ expect(user1.bulked?).to be_falsy }
-      specify{ expect(User.find(user3._id)).to be_nil }
+      specify{ expect(SomeUser.find(user3._id)).to be_nil }
 
       specify{ expect(user4).to be_persisted }
       specify{ expect(user1.bulked?).to be_falsy }

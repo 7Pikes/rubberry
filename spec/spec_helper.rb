@@ -36,6 +36,15 @@ RSpec.configure do |config|
     end
   end
 
+  config.around :each, index_model: ->(v){ v.is_a?(String) || v.is_a?(Class) } do |example|
+    indices = Array.wrap(example.metadata[:index_model]).map{|model| model.index_name }.
+      uniq.map{|index| Rubberry::Index.new(index) }
+
+    indices.map(&:reset)
+    example.run
+    indices.map(&:delete)
+  end
+
   config.around :each, time_freeze: ->(v){ v.is_a?(Date) || v.is_a?(Time) || v.is_a?(String) } do |example|
     datetime = if example.metadata[:time_freeze].is_a?(String)
       DateTime.parse(example.metadata[:time_freeze])

@@ -1,21 +1,7 @@
 require 'spec_helper'
 
 describe Rubberry::Fields do
-  let(:model) do
-    stub_model('Model') do
-      mappings do
-        field :string
-        field :string_with_default, default: 'default string'
-        field :integer, type: 'integer'
-        field :multi_field, type: 'string' do
-          field :raw, type: 'string', index: false
-        end
-        field :object do
-          field :subfield, type: 'string'
-        end
-      end
-    end
-  end
+  let(:model){ Model }
 
   subject{ model }
 
@@ -58,7 +44,7 @@ describe Rubberry::Fields do
   end
 
   describe '.inherited' do
-    let(:submodel){ stub_model('SubModel', Model) }
+    let(:submodel){ SubModel }
 
     specify{ expect(model._mappings.equal?(submodel._mappings)).to be_falsy }
     specify{ expect(model._mappings.fields).to eq(submodel._mappings.fields) }

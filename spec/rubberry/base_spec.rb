@@ -1,59 +1,38 @@
 require 'spec_helper'
 
 describe Rubberry::Base do
-  subject{ stub_model('User::CustomEvent') }
+  subject{ SomeNamespace::DefaultModel }
 
   describe '.index_name' do
-    specify{ expect(subject.index_name).to eq('test_users') }
-
-    context do
-      before{ subject.index_name('events') }
-      specify{ expect(subject.index_name).to eq('test_events') }
-    end
+    specify{ expect(SomeNamespace::DefaultModel.index_name).to eq('test_some_namespaces') }
+    specify{ expect(SomeNamespace::SomeModel.index_name).to eq('test_some_index') }
   end
 
   describe '.type_name' do
-    specify{ expect(subject.type_name).to eq('custom_event') }
-
-    context do
-      before{ subject.type_name('event') }
-      specify{ expect(subject.type_name).to eq('event') }
-    end
+    specify{ expect(SomeNamespace::DefaultModel.type_name).to eq('default_model') }
+    specify{ expect(SomeNamespace::SomeModel.type_name).to eq('some_type') }
   end
 
   describe '.document_ttl' do
-    specify{ expect(subject.document_ttl).to be_nil }
-
-    context do
-      before{ subject.document_ttl('8w') }
-      specify{ expect(subject.document_ttl).to eq('8w') }
-    end
+    specify{ expect(SomeNamespace::DefaultModel.document_ttl).to be_nil }
+    specify{ expect(SomeNamespace::SomeModel.document_ttl).to eq('10w') }
   end
 
   describe '.document_ttl?' do
-    specify{ expect(subject.document_ttl?).to be_falsy }
-
-    context do
-      before{ subject.document_ttl('8w') }
-      specify{ expect(subject.document_ttl?).to be_truthy }
-    end
+    specify{ expect(SomeNamespace::DefaultModel.document_ttl?).to be_falsy }
+    specify{ expect(SomeNamespace::SomeModel.document_ttl?).to be_truthy }
   end
 
   describe '.abstract?' do
-    specify{ expect(subject.abstract?).to be_falsy }
-
-    context do
-      before{ subject.abstract! }
-      specify{ expect(subject.abstract?).to be_truthy }
-    end
+    specify{ expect(Abstract.abstract?).to be_truthy }
+    specify{ expect(User.abstract?).to be_falsy }
   end
 
   describe '.context' do
-    subject{ stub_model('Event') }
-    specify{ expect(subject.context).to be_instance_of(Rubberry::Context) }
-    specify{ expect(subject.context.equal?(subject.context)).to be_falsy }
-    specify{ expect(subject.context.send(:request)).to eq(
-      body: { version: true }, index: 'test_events', type: ['event']
+    specify{ expect(User.context).to be_instance_of(Rubberry::Context) }
+    specify{ expect(User.context.equal?(User.context)).to be_falsy }
+    specify{ expect(User.context.send(:request)).to eq(
+      body: { version: true }, index: 'test_users', type: ['user']
     ) }
   end
 
@@ -66,12 +45,12 @@ describe Rubberry::Base do
   end
 
   describe '#connection' do
-    subject{ stub_model('Event').new }
+    subject{ User.new }
     specify{ expect(subject.connection).to be_instance_of(Elasticsearch::Transport::Client) }
   end
 
   describe '#config' do
-    subject{ stub_model('Event').new }
+    subject{ User.new }
     specify{ expect(subject.config).to be_instance_of(Rubberry::Configuration) }
   end
 end

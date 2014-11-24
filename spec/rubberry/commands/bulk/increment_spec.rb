@@ -1,20 +1,7 @@
 require 'spec_helper'
 
-describe Rubberry::Commands::Bulk::Increment do
-  before do
-    stub_model('User') do
-      mappings do
-        field :name
-        field :counter1, type: 'integer', default: 0
-        field :counter2, type: 'integer'
-      end
-    end
-    User.index.create
-  end
-
+describe Rubberry::Commands::Bulk::Increment, index_model: User do
   let(:user){ User.create(name: 'Undr') }
-
-  after{ User.index.delete }
 
   describe '#request' do
     subject{ Rubberry::Commands::Bulk::Increment.new(user, options).request }

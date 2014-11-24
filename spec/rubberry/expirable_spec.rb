@@ -1,39 +1,6 @@
 require 'spec_helper'
 
-describe Rubberry::Expirable do
-  before do
-    stub_model('UserWithTTL') do
-      document_ttl '2s'
-
-      mappings do
-        field :name
-      end
-    end
-
-    stub_model('UserWithTimestamp') do
-      mappings do
-        _timestamp enabled: true, store: true
-        field :name
-      end
-    end
-
-    stub_model('User') do
-      mappings do
-        field :name
-      end
-    end
-
-    User.index.create
-    UserWithTTL.index.create
-    UserWithTimestamp.index.create
-  end
-
-  after do
-    User.index.delete
-    UserWithTTL.index.delete
-    UserWithTimestamp.index.delete
-  end
-
+describe Rubberry::Expirable, index_model: User do
   describe '#_ttl' do
     subject{ UserWithTTL.create(name: 'Undr') }
 

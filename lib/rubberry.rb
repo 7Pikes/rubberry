@@ -59,7 +59,7 @@ module Rubberry
 
   def index_models
     Rubberry::Base.inherited_models.reject(&:abstract?).inject(Hash.new{|h, k| h[k] = [] }) do |result, model|
-      result[model.index_name.to_s] << model if Object.const_defined?(model.name)
+      result[model.index_name.to_s] << model
       result
     end
   end

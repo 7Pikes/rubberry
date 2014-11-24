@@ -42,14 +42,29 @@ describe Rubberry do
   end
 
   describe '.indices', classes: true do
-    specify{ expect(Rubberry.indices.map(&:class)).to eq([Rubberry::Index, Rubberry::Index]) }
-    specify{ expect(Rubberry.indices.map(&:index_name)).to eq(['test_events', 'test_user_events']) }
+    specify{ expect(Rubberry.indices.map(&:class)).to eq([
+      Rubberry::Index, Rubberry::Index, Rubberry::Index, Rubberry::Index, Rubberry::Index, Rubberry::Index,
+      Rubberry::Index, Rubberry::Index, Rubberry::Index, Rubberry::Index
+    ]) }
+
+    specify{ expect(Rubberry.indices.map(&:index_name)).to eq([
+      'test_some_namespaces', 'test_some_index', 'test_events', 'test_user_events', 'test_users', 'test_models',
+      'test_sub_models', 'test_empty_models', 'test_admins', 'test_some_users'
+    ]) }
   end
 
   describe '.index_models', classes: true do
     specify{ expect(Rubberry.index_models).to eq(
+      'test_some_namespaces' => [SomeNamespace::DefaultModel],
+      'test_some_index' => [SomeNamespace::SomeModel],
+      'test_events' => [Events::Error],
       'test_user_events' => [Events::Info, UserEvent],
-      'test_events' => [Events::Error]
+      'test_users' => [User, UserWithTTL, UserWithTimestamp],
+      'test_models' => [Model],
+      'test_sub_models' => [SubModel],
+      'test_empty_models' => [EmptyModels],
+      'test_admins' => [Admin],
+      'test_some_users' => [SomeUser]
     ) }
   end
 

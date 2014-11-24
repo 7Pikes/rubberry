@@ -1,17 +1,6 @@
 require 'spec_helper'
 
-describe Rubberry::Finders do
-  before do
-    stub_model('User') do
-      mappings do
-        field :name
-      end
-    end
-    User.index.create
-  end
-
-  after{ User.index.delete }
-
+describe Rubberry::Finders, index_model: User do
   let(:user1){ User.create!(name: 'Undr') }
   let(:user2){ User.create!(name: 'Arny') }
   let(:user3){ User.create!(name: 'Rob') }

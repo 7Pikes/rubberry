@@ -1,25 +1,14 @@
 require 'spec_helper'
 
-describe Rubberry::Commands::Delete do
-  before do
-    stub_model('User') do
-      mappings do
-        field :name
-      end
-    end
-    User.index.create
-  end
-
-  after{ User.index.delete }
-
-  let(:user){ User.create(name: 'Undr') }
+describe Rubberry::Commands::Delete, index_model: SomeUser do
+  let(:user){ SomeUser.create(name: 'Undr') }
 
   describe '#request' do
     let(:options){ {} }
 
     subject{ Rubberry::Commands::Delete.new(user, options).request }
 
-    specify{ expect(subject).to eq(index: 'test_users', type: 'user', id: user._id, refresh: true) }
+    specify{ expect(subject).to eq(index: 'test_some_users', type: 'user', id: user._id, refresh: true) }
 
     context 'with options' do
       let(:time){ Time.now }
@@ -31,7 +20,7 @@ describe Rubberry::Commands::Delete do
       } }
 
       specify{ expect(subject).to eq(
-        index: 'test_users',
+        index: 'test_some_users',
         type: 'user',
         id: user._id,
         refresh: false,
@@ -58,7 +47,7 @@ describe Rubberry::Commands::Delete do
     context 'when document is destroyable' do
       before{ Rubberry::Commands::Delete.new(user, options).perform }
       specify{ expect(user).to be_destroyed }
-      specify{ expect(User.find(user._id)).to be_nil }
+      specify{ expect(SomeUser.find(user._id)).to be_nil }
     end
 
     context 'when document is not destroyable' do
@@ -69,7 +58,7 @@ describe Rubberry::Commands::Delete do
       context do
         before{ Rubberry::Commands::Delete.new(user, options).perform }
         specify{ expect(user).not_to be_destroyed }
-        specify{ expect(User.find(user._id)).not_to be_nil }
+        specify{ expect(SomeUser.find(user._id)).not_to be_nil }
       end
     end
   end

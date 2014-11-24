@@ -1,29 +1,17 @@
 require 'spec_helper'
 
-describe Rubberry::Commands::Update do
-  before do
-    stub_model('User') do
-      mappings do
-        field :name
-        field :nickname
-      end
-    end
-    User.index.create
-  end
-
-  after{ User.index.delete }
-
-  let(:user){ User.create(name: 'Undr', nickname: 'Great') }
+describe Rubberry::Commands::Update, index_model: Events::Info do
+  let(:event){ Events::Info.create(name: 'page_view', message: 'Ok!') }
 
   describe '#request' do
     let(:options){ {} }
 
-    before{ user.name = 'Arny' }
+    before{ event.message = 'Done!' }
 
-    subject{ Rubberry::Commands::Update.new(user, options).request }
+    subject{ Rubberry::Commands::Update.new(event, options).request }
 
     specify{ expect(subject).to eq(
-      index: 'test_users', type: 'user', id: user._id, body: { doc: { 'name' => 'Arny' } }, refresh: true
+      index: 'test_user_events', type: 'info', id: event._id, body: { doc: { 'message' => 'Done!' } }, refresh: true
     ) }
 
     context 'with options' do
@@ -39,10 +27,10 @@ describe Rubberry::Commands::Update do
       } }
 
       specify{ expect(subject).to eq(
-        index: 'test_users',
-        type: 'user',
-        id: user._id,
-        body: { doc: { 'name' => 'Arny' } },
+        index: 'test_user_events',
+        type: 'info',
+        id: event._id,
+        body: { doc: { 'message' => 'Done!' } },
         refresh: false,
         retry_on_conflict: 3,
         consistency: :all,
@@ -65,34 +53,34 @@ describe Rubberry::Commands::Update do
   end
 
   describe '#perform' do
-    let(:reloaded_user){ user.reload }
+    let(:reloaded_event){ event.reload }
     let(:options){ {} }
-    let!(:version){ user._version }
+    let!(:version){ event._version }
 
-    before{ user.name = 'Arny' }
+    before{ event.message = 'Done!' }
 
     context 'when document is updatable' do
-      before{ Rubberry::Commands::Update.new(user, options).perform }
+      before{ Rubberry::Commands::Update.new(event, options).perform }
 
-      specify{ expect(user.name).to eq('Arny') }
-      specify{ expect(user.changed?).to be_falsy }
-      specify{ expect(user._version).to eq(version + 1) }
-      specify{ expect(reloaded_user._version).to eq(version + 1) }
-      specify{ expect(reloaded_user.name).to eq('Arny') }
+      specify{ expect(event.message).to eq('Done!') }
+      specify{ expect(event.changed?).to be_falsy }
+      specify{ expect(event._version).to eq(version + 1) }
+      specify{ expect(reloaded_event._version).to eq(version + 1) }
+      specify{ expect(reloaded_event.message).to eq('Done!') }
     end
 
     context 'when document is not updatable' do
-      before{ allow(user).to receive(:updatable?).and_return(false) }
+      before{ allow(event).to receive(:updatable?).and_return(false) }
 
-      specify{ expect(Rubberry::Commands::Update.new(user, options).perform).to be_falsy }
+      specify{ expect(Rubberry::Commands::Update.new(event, options).perform).to be_falsy }
 
       context do
-        before{ Rubberry::Commands::Update.new(user, options).perform }
-        specify{ expect(user.name).to eq('Arny') }
-        specify{ expect(user.changed?).to be_truthy }
-        specify{ expect(user._version).to eq(version) }
-        specify{ expect(reloaded_user._version).to eq(version) }
-        specify{ expect(reloaded_user.name).to eq('Undr') }
+        before{ Rubberry::Commands::Update.new(event, options).perform }
+        specify{ expect(event.message).to eq('Done!') }
+        specify{ expect(event.changed?).to be_truthy }
+        specify{ expect(event._version).to eq(version) }
+        specify{ expect(reloaded_event._version).to eq(version) }
+        specify{ expect(reloaded_event.message).to eq('Ok!') }
       end
     end
   end

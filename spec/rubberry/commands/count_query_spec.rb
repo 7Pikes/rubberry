@@ -1,27 +1,8 @@
 require 'spec_helper'
 
-describe Rubberry::Commands::CountQuery do
-  before do
-    stub_model('UserWithoutIndex') do
-       mappings do
-        field :name
-        field :handsome, type: 'boolean', default: true
-      end
-    end
-
-    stub_model('User') do
-      mappings do
-        field :name
-        field :handsome, type: 'boolean', default: true
-      end
-    end
-    User.index.create
-  end
-
-  after{ User.index.delete }
-
+describe Rubberry::Commands::CountQuery, index_model: SomeUser do
   describe '#request' do
-    let(:ctx){ User.context }
+    let(:ctx){ SomeUser.context }
 
     subject{ Rubberry::Commands::CountQuery.new(ctx).request }
 
@@ -30,22 +11,22 @@ describe Rubberry::Commands::CountQuery do
     end
 
     context 'with query' do
-      let(:ctx){ User.filter(handsome: true) }
+      let(:ctx){ SomeUser.filter(handsome: true) }
 
       specify{ expect(subject).to eq(ctx.count_query_request) }
     end
   end
 
   describe '#perform' do
-    let(:ctx){ User.context }
+    let(:ctx){ SomeUser.context }
 
     subject{ Rubberry::Commands::CountQuery.new(ctx).perform }
 
     before do
-      User.create(name: 'Undr')
-      User.create(name: 'Ammy')
-      User.create(name: 'Arny', handsome: false)
-      User.create(name: 'Ron', handsome: false)
+      SomeUser.create(name: 'Undr')
+      SomeUser.create(name: 'Ammy')
+      SomeUser.create(name: 'Arny', handsome: false)
+      SomeUser.create(name: 'Ron', handsome: false)
     end
 
     context 'without query' do
@@ -53,18 +34,18 @@ describe Rubberry::Commands::CountQuery do
     end
 
     context 'with query' do
-      let(:ctx){ User.filter{ handsome == true } }
+      let(:ctx){ SomeUser.filter{ handsome == true } }
 
       specify{ expect(subject).to eq(2) }
     end
 
     context 'when none' do
-      let(:ctx){ User.none }
+      let(:ctx){ SomeUser.none }
       specify{ expect(subject).to eq(0) }
     end
 
     context 'when index missing' do
-      let(:ctx){ UserWithoutIndex.context }
+      let(:ctx){ User.context }
       specify{ expect(subject).to eq(0) }
     end
   end

@@ -51,7 +51,7 @@ module Rubberry
         if value
           self._type_name = value
         else
-          _type_name.presence || default_type_name
+          _type_name.try(:to_s).presence || default_type_name
         end
       end
 

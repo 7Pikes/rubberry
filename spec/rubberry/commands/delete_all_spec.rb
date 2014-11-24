@@ -1,20 +1,8 @@
 require 'spec_helper'
 
-describe Rubberry::Commands::DeleteAll do
-  before do
-    stub_model('User') do
-      mappings do
-        field :name
-        field :handsome, type: 'boolean', default: true
-      end
-    end
-    User.index.create
-  end
-
-  after{ User.index.delete }
-
+describe Rubberry::Commands::DeleteAll, index_model: SomeUser do
   describe '#request' do
-    let(:ctx){ User.context }
+    let(:ctx){ SomeUser.context }
     let(:options){ {} }
 
     subject{ Rubberry::Commands::DeleteAll.new(ctx, options).request }
@@ -24,7 +12,7 @@ describe Rubberry::Commands::DeleteAll do
     end
 
     context 'with query' do
-      let(:ctx){ User.filter(handsome: true) }
+      let(:ctx){ SomeUser.filter(handsome: true) }
       specify{ expect(subject).to eq(ctx.delete_all_request) }
     end
 
@@ -47,25 +35,25 @@ describe Rubberry::Commands::DeleteAll do
   end
 
   describe '#perform' do
-    let(:ctx){ User.context }
+    let(:ctx){ SomeUser.context }
 
     subject{ Rubberry::Commands::DeleteAll.new(ctx).perform }
 
     before do
-      User.create(name: 'Undr')
-      User.create(name: 'Ammy')
-      User.create(name: 'Arny', handsome: false)
-      User.create(name: 'Ron', handsome: false)
+      SomeUser.create(name: 'Undr')
+      SomeUser.create(name: 'Ammy')
+      SomeUser.create(name: 'Arny', handsome: false)
+      SomeUser.create(name: 'Ron', handsome: false)
     end
 
     context 'without query' do
-      specify{ expect{ subject }.to change{ User.count }.from(4).to(0) }
+      specify{ expect{ subject }.to change{ SomeUser.count }.from(4).to(0) }
     end
 
     context 'with query' do
-      let(:ctx){ User.filter{ handsome == true } }
+      let(:ctx){ SomeUser.filter{ handsome == true } }
 
-      specify{ expect{ subject }.to change{ User.count }.from(4).to(2) }
+      specify{ expect{ subject }.to change{ SomeUser.count }.from(4).to(2) }
 
       context do
         before{ subject }

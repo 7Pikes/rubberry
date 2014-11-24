@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Rubberry::Stateful, 'object' do
-  let(:model){ stub_model('Model'){ mappings{ field(:name) } } }
+  let(:model){ UserEvent }
 
   context 'when initialized without attributes' do
     subject{ model.new }
