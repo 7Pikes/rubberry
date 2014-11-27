@@ -6,6 +6,21 @@ The ODM functionality for ElasticSearch documents. It works with ElasticSearch l
 [![Code Climate](https://codeclimate.com/github/undr/rubberry/badges/gpa.svg)](https://codeclimate.com/github/undr/rubberry)
 [![Test Coverage](https://codeclimate.com/github/undr/rubberry/badges/coverage.svg)](https://codeclimate.com/github/undr/rubberry)
 
+## Why
+
+Some people talk that it isn't good idea to use ElasticSearch as a primary database. Generally, they are right. But sometimes we need to have fast and temporary storage with strong search ability. That all about logs and events processing. 
+
+Which do preconditions allow us to use ElasticSearch as a primary database?
+
+- Needs in fast and rich search.
+- Minimal changes of schema during life-cycle of an application. (To avoid reindex each deploy).
+- Temporary or/and minor storage.
+
+It has been written for events processing and is a kind of an experiment. 
+
+You should use `chewy` or other 'ElasticSearch as index' solutions if you want to use it in tandem with another database.
+
+
 ## Installation
 
 Add this line to your application's Gemfile:
