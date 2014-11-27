@@ -15,6 +15,7 @@ Which do preconditions allow us to use ElasticSearch as a primary database?
 - Needs in fast and rich search.
 - Minimal changes of schema during life-cycle of an application. (To avoid reindex each deploy).
 - Temporary or/and minor storage.
+- None relation between documents.
 
 It has been written for events processing and is a kind of an experiment. 
 
