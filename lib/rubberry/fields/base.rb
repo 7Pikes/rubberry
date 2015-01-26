@@ -33,6 +33,10 @@ module Rubberry
         !!@as_array
       end
 
+      def allow_any?
+        !!options[:allow_any]
+      end
+
       def default_value(object)
         return if @default.nil?
         @default.respond_to?(:call) ? execute_default_block(@default, object) : @default
