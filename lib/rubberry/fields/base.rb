@@ -13,7 +13,7 @@ module Rubberry
 
         def elasticize
           return nil if __target__.nil?
-          _target.map(&:elasticize)
+          __target__.map(&:elasticize)
         end
       end
 
